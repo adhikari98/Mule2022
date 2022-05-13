@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="global-exceptionError_Handler" doc:id="467f6272-c966-41e4-a3d9-4cd9ee0bfba0" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="Error Propagate" doc:id="33379b1b-9c7e-435a-a185-99d2a733b639" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION,MULE:RETRY_EXHAUSTED" >
+			<logger level="INFO" doc:name="Logger" doc:id="b9846137-8235-4589-8744-3d0df374b246" message="error flow#[payload]" />
+			<ee:transform doc:name="Transform Message" doc:id="6687242b-c633-4816-80d7-736e89326d77" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{  
+    "status":500,
+	"issue":"this is database issue,Please try after some time"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="85ed56b7-84b8-4a86-82b2-125e8b9181a0" name="NotificationFlow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="Error Propagate" doc:id="9cd0247e-426f-4378-8368-4b83a9bc615b" type="MULE:EXPRESSION" >
+			<logger level="INFO" doc:name="Logger" doc:id="f66dae6e-c291-4bc5-9c9b-a285bb949063" message="errorflow" />
+			<ee:transform doc:name="Transform Message" doc:id="6ca42905-de0c-44b7-9853-fa0b6ab7331e">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"status":500,
+	"issue":"this some other issue,they looking into this"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="428341d4-dd7b-4848-85f8-81f0b08010db" name="NotificationFlow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="Error Propagate" doc:id="0cd4594e-c7f0-4cca-a8aa-dd3f4a2bfec9" type="INVALID:DEPT_ID">
+			<logger level="INFO" doc:name="Logger" doc:id="f89c7716-8a3b-49ed-b5d2-bcad07eee4b7" message="errorflow" />
+			<ee:transform doc:name="Transform Message" doc:id="87dac563-a0c6-4f24-abcc-8a0819a072a9" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"status":500,
+	"issue":"please enter the correct id"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="ff5432f1-f9ec-401a-9445-56d3a81496a7" name="NotificationFlow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="17b9e726-ce52-400c-b408-e4a58eb4c4d3" type="ANY">
+			<logger level="INFO" doc:name="Logger" doc:id="62dfc672-09da-4268-810a-7e8975378448" message="errorflow" />
+			<ee:transform doc:name="Transform Message" doc:id="29c02a09-5554-4121-8ed3-fbf152cfdc54" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"status":500,
+	"issue":"this code issue,developer will solve ASAP,Please try after some time"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="ce866f76-1cea-41c2-8458-580f277dc8a9" name="NotificationFlow"/>
+		</on-error-propagate>
+	</error-handler>
+</mule>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="selectflow" doc:id="5bed96c8-e6ae-4693-8d0e-d17b3b1e21a1" >
+		<until-successful maxRetries="${retry}" doc:name="Until Successful" doc:id="5f59e3f1-2e3d-45d6-87cc-7f8d5736e587" millisBetweenRetries="${time}" >
+			<db:select doc:name="Select" doc:id="897d5986-b60b-4693-9f06-5935a42346b4" config-ref="Database_Config" >
+				<db:sql ><![CDATA[SELECT * FROM employment.location where ename=:eskill;]]></db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	"eskill":attributes.queryParams.dept
+}]]]></db:input-parameters>
+			</db:select>
+			<logger level="INFO" doc:name="Logger" doc:id="6df0bd08-6db4-4756-b46c-72123e160d3d" message="db" />
+			<ee:transform doc:name="Transform Message" doc:id="5c58c6cc-41b3-4a50-b6e7-cc518b9c5679" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</until-successful>
+	</flow>
+	<flow name="postflow" doc:id="8a155925-7905-472e-8ab1-0e35db84e0fd" >
+		<until-successful maxRetries="${retry}" doc:name="Until Successful" doc:id="09cd97f5-9ac1-4316-9bfd-77e2b053aa46" millisBetweenRetries="${time}" >
+			<db:insert doc:name="Insert" doc:id="bb2c479c-29cb-442e-9ae3-7bae5642fdbc" config-ref="Database_Config" >
+				<db:sql ><![CDATA[INSERT INTO `employment`.`location` (`eid`, `ename`) VALUES (:eid, :ename);]]></db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	"eid":payload.id,
+	"ename":payload.name
+}]]]></db:input-parameters>
+			</db:insert>
+			<logger level="INFO" doc:name="Logger" doc:id="78e2ca1b-f50d-49c0-8ae0-d339cf5972b8" message="#[payload]" />
+		</until-successful>
+		<ee:transform doc:name="Transform Message" doc:id="078de933-bfbf-44ae-88fe-9333112eccf2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="updateflow" doc:id="7eb0c0e8-3546-4945-b8a9-2c62c95a0949" >
+		<until-successful maxRetries="${retry}" doc:name="Until Successful" doc:id="a93cf822-06e9-4a98-8e95-00624df85a2b" millisBetweenRetries="${time}" >
+			<try doc:name="Try" doc:id="69c8ec87-d743-4640-97d3-a4c1909fcb30" >
+				<db:update doc:name="Update" doc:id="66b8b258-9dbb-4be2-af9e-d55781983cd5" config-ref="Database_Config">
+				<db:sql><![CDATA[UPDATE `employment`.`location` SET `ename` = :empname WHERE (`eid` = :empid);
+]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+	"empid":payload.id,
+	"empname":payload.name
+}]]]></db:input-parameters>
+			</db:update>
+				<error-handler >
+					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9e83510a-6f85-43e4-b631-94fb73185abc" type="DB:CONNECTIVITY">
+						<logger level="INFO" doc:name="Logger" doc:id="dae48151-7c09-4169-9cba-23928cc9c059" message="connectvity error"/>
+					</on-error-propagate>
+				</error-handler>
+			</try>
+			<logger level="INFO" doc:name="Logger" doc:id="8a8dbcbc-2e31-41c3-9118-c06399209378" message="#[payload]" />
+		</until-successful>
+		<ee:transform doc:name="Transform Message" doc:id="aaae835c-6032-4682-ae3d-577b6ee0da4f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteflow" doc:id="eaad9930-799f-4d6f-9080-7484ff3ba877" >
+		<until-successful maxRetries="${retry}" doc:name="Until Successful" doc:id="72bb2a33-93e5-40fd-8061-530190337c5a" millisBetweenRetries="${time}" >
+			<db:delete doc:name="Delete" doc:id="7d8390a8-cb1a-4aaf-b60d-65f4eb78dc8c" config-ref="Database_Config" >
+				<db:sql ><![CDATA[DELETE FROM `employment`.`location` WHERE (`ename` = :eskill);]]></db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	"eskill":attributes.queryParams.dept
+}]]]></db:input-parameters>
+			</db:delete>
+			<logger level="INFO" doc:name="Logger" doc:id="64940dc1-a366-47a6-9cc6-9d33bc127c3c" message="#[payload]" />
+		</until-successful>
+		<ee:transform doc:name="Transform Message" doc:id="e0029ce6-086a-4aec-8f10-00cdc1b297c5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="9b471e18-95a5-40a1-89fc-ea8de69052a4" >
+		<email:smtp-connection host="smtp.gmail.com" port="587" user="shivayya2468@gmail.com" password="itjuxetteaielsjq" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<cloudhub:config name="CloudHub_Config" doc:name="CloudHub Config" doc:id="5941273c-9b8a-4b44-8589-e027080bca25" >
+		<cloudhub:connection username="adhikari_u21" password="shivayya98@" environment="c8cbf668-9a5d-4bdf-bf65-ac6977328bc3"/>
+	</cloudhub:config>
+	<sub-flow name="NotificationFlow" doc:id="7028630a-d529-44bb-93ec-96df6698690a" >
+		<logger level="INFO" doc:name="Logger" doc:id="ef63a0fc-19f4-4c5e-b51a-f3bec6749d03" message="notification flow"/>
+		<email:send doc:name="Send" doc:id="86a0f9bd-83c6-4b94-8566-b48445683bf2" config-ref="Email_SMTP" fromAddress="shivayya2468@gmail.com" subject='#["error occurred in API"]'>
+			<email:to-addresses >
+				<email:to-address value="shivayya2468@gmail.com" />
+			</email:to-addresses>
+			<email:body contentType="text/plain" />
+		</email:send>
+	</sub-flow>
+	<sub-flow name="notificationsSub_Flow" doc:id="0f1861af-7cdb-4b34-ab3b-1fb4185855b9" >
+		<logger level="INFO" doc:name="Logger" doc:id="aefabf20-846a-4d97-b861-4d0a8c8ed35e" message="notificationflow"/>
+		<cloudhub:create-notification doc:name="Create Notification" doc:id="9ea54557-a50a-4004-9421-00e21740bbd6" config-ref="CloudHub_Config" domain="first-raml1" priority="ERROR"/>
+	</sub-flow>
+</mule>

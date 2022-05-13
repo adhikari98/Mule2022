@@ -1,0 +1,90 @@
+#%RAML 1.0
+title: first raml1
+uses:
+  lib: libaries/library.raml    
+/productitem:
+  get:
+    is: lib.id_required
+    queryParameters:
+      dept:
+        type: string
+        minLength: 2
+        maxLength: 8
+    description: fetching the detailes from system
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include responces/get.json
+  post:
+    is: lib.id_required
+    queryParameters:
+      dept:
+        type: string
+        minLength: 2
+        maxLength: 8
+    description: insert the data from system
+    body:
+      application/json:
+        example: !include Requests/post.json
+        type: !include datatypes/postdataType.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example: !include responces/post.json
+  put:
+    is: lib.id_required
+    queryParameters:
+      dept:
+        type: string
+        minLength: 2
+        maxLength: 8
+    description: update the data from system
+    body:
+      application/json:
+        example: !include Requests/put.json
+        type: !include datatypes/putType.raml
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include responces/put.json
+  delete:
+    is: lib.id_required
+    queryParameters:
+      dept:
+        type: string
+        minLength: 2
+        maxLength: 8
+    description: delete the data from system
+    body:
+      application/json:
+        example: !include Requests/delete.json
+        type: !include datatypes/deletedataType.raml
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include responces/delete.json
+              
+          
+              
+              
+          
+                                              
+              
+              
+          
+
+                          
+              
+
+ 
+
+
+          
+                                   
+          
+                                                                                                                                                                                                                                         
+                                              
